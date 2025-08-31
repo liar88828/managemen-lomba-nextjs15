@@ -2,6 +2,9 @@
 
 import { prisma } from "../lib/prisma"
 
+export const getLombaAll = async () => {
+  return await prisma.lomba.findMany({ orderBy: { waktu: "asc" } })
+}
 
 export async function tambahLomba(formData: FormData) {
   const title = formData.get("title") as string

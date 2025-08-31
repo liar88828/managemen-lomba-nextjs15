@@ -39,9 +39,7 @@ export default async function RootLayout({
           ctaHref={!session ? "/register" : "/logout"}
           ctaText={!session ? 'Daftar' : 'Keluar'}
         />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );
