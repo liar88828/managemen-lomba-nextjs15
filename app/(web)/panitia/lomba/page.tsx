@@ -5,25 +5,29 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useLombaStore } from "@/app/store/useLombaStore"
-import { Lomba } from "@/app/generated/prisma"
+import { AlatLomba, Lomba, useLombaStore } from "@/app/store/useLombaStore"
 import { useRouter } from "next/navigation"
-import { format } from "path"
 import { formatDate } from "@/app/lib/formatter"
+import { Panitia } from "@/app/store/usePanitiaStore"
+import { Peserta } from "@/app/store/usePesertaStore"
 
+type FormLomba = {
+    id?: string
+    title: string
+    deskripsi: string
+    lokasi: string
+    waktu: string
+    panitia: Panitia[]
+    peserta: Peserta[]
+    alatLomba: AlatLomba[]
+}
 export default function LombaPage() {
     const router = useRouter()
     const { lombas, addLomba, updateLomba, deleteLomba } = useLombaStore()
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editData, setEditData] = useState<Lomba | null>(null)
 
-    const handleSave = (data: {
-        id?: string
-        title: string
-        deskripsi: string
-        lokasi: string
-        waktu: string
-    }) => {
+    const handleSave = (data: FormLomba) => {
         if (data.id) {
             updateLomba({
                 id: data.id,
@@ -32,7 +36,10 @@ export default function LombaPage() {
                 deskripsi: data.deskripsi,
                 lokasi: data.lokasi,
                 waktu: new Date(data.waktu),
-                panitiaId: null,
+                panitia: data.panitia,
+                peserta: data.peserta,
+                alatLomba: data.alatLomba,
+
             })
         } else {
             addLomba({
@@ -41,7 +48,6 @@ export default function LombaPage() {
                 deskripsi: data.deskripsi,
                 lokasi: data.lokasi,
                 waktu: new Date(data.waktu),
-                panitiaId: null,
             })
         }
         setIsModalOpen(false)
@@ -72,6 +78,10 @@ export default function LombaPage() {
                                 <Button size="sm" variant="destructive" onClick={() => deleteLomba(l.id)}>Hapus</Button>
                             </div>
                         </CardContent>
+
+
+
+
                     </Card>
                 ))}
             </div>
@@ -89,7 +99,7 @@ export default function LombaPage() {
 interface LombaModalProps {
     isOpen: boolean
     onClose: () => void
-    onSave: (data: { id?: string; title: string; deskripsi: string; lokasi: string; waktu: string }) => void
+    onSave: (data: FormLomba) => void
     initialData?: Lomba
 }
 
@@ -104,7 +114,7 @@ function LombaModal({ isOpen, onClose, onSave, initialData }: Readonly<LombaModa
             setTitle(initialData.title)
             setDeskripsi(initialData.deskripsi)
             setLokasi(initialData.lokasi)
-            setWaktu(initialData.waktu.toISOString().split("T")[0]) // prefill YYYY-MM-DD
+            setWaktu(new Date(initialData.waktu).toISOString().split("T")[0]) // prefill YYYY-MM-DD
         } else {
             setTitle("")
             setDeskripsi("")
@@ -114,7 +124,12 @@ function LombaModal({ isOpen, onClose, onSave, initialData }: Readonly<LombaModa
     }, [initialData, isOpen])
 
     const handleSubmit = () => {
-        onSave({ id: initialData?.id, title, deskripsi, lokasi, waktu })
+        onSave({
+            id: initialData?.id, title, deskripsi, lokasi, waktu,
+            panitia: initialData?.panitia || [],
+            peserta: initialData?.peserta || [],
+            alatLomba: initialData?.alatLomba || [],
+        })
         onClose()
     }
 
@@ -125,11 +140,56 @@ function LombaModal({ isOpen, onClose, onSave, initialData }: Readonly<LombaModa
                     <DialogTitle>{initialData ? "Edit Lomba" : "Tambah Lomba"}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                    <Input placeholder="Judul lomba" value={title} onChange={(e) => setTitle(e.target.value)} />
-                    <Input placeholder="Deskripsi lomba" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} />
-                    <Input placeholder="Lokasi lomba" value={lokasi} onChange={(e) => setLokasi(e.target.value)} />
-                    <Input type="date" value={waktu} onChange={(e) => setWaktu(e.target.value)} />
+                    <div className="space-y-2">
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                            Judul Lomba
+                        </label>
+                        <Input
+                            id="title"
+                            placeholder="Judul lomba"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="deskripsi" className="block text-sm font-medium text-gray-700">
+                            Deskripsi Lomba
+                        </label>
+                        <Input
+                            id="deskripsi"
+                            placeholder="Deskripsi lomba"
+                            value={deskripsi}
+                            onChange={(e) => setDeskripsi(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="lokasi" className="block text-sm font-medium text-gray-700">
+                            Lokasi Lomba
+                        </label>
+                        <Input
+                            id="lokasi"
+                            placeholder="Lokasi lomba"
+                            value={lokasi}
+                            onChange={(e) => setLokasi(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="waktu" className="block text-sm font-medium text-gray-700">
+                            Waktu Lomba
+                        </label>
+                        <Input
+                            id="waktu"
+                            type="date"
+                            value={waktu}
+                            onChange={(e) => setWaktu(e.target.value)}
+                        />
+                    </div>
                 </div>
+
+
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Batal</Button>
                     <Button onClick={handleSubmit}>{initialData ? "Update" : "Tambah"}</Button>

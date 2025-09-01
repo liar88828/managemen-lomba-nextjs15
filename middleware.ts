@@ -2,13 +2,12 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { getIronSession } from "iron-session"
-import { prisma } from "./app/lib/prisma"
 import { SessionData, sessionOptions } from "./app/actions/config"
 
 
 
 export async function middleware(req: NextRequest) {
-  const protectedRoutes = ["/dashboard", "/panitia", "/admin"] // ⬅️ sesuaikan
+  const protectedRoutes = ["/dashboard", "/panitia", "/admin", '/peserta'] // ⬅️ sesuaikan
   const { pathname } = req.nextUrl
 
 
@@ -20,7 +19,7 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const session = await getIronSession<SessionData>(req, res, sessionOptions)
 
-  console.log("Session:", session)
+  // console.log("Session:", session)
   if (!session.user || !session.token) {
     return NextResponse.redirect(new URL("/login", req.url))
   }

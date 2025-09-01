@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar01, Navbar01NavLink } from "@/components/mini/navbar";
-import { getSession } from "./actions/session";
+import { getSessionUser } from "./actions/session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,25 +25,45 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const session = await getSession()
-
+  const session = await getSessionUser()
+  const role = session.user?.role
+  const roleLine = role === 'ADMIN'
+    ? menuAdmin
+    : role === 'PANITIA'
+      ? menuPanitia
+      : role === 'PESERTA'
+        ? menuPeserta
+        : defaultNavigationLinks
+  // console.log('rolse', session?.user?.role)
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar01
-          navigationLinks={defaultNavigationLinks}
+          navigationLinks={roleLine}
           signInHref="/login"
           signInText={!session ? "Masuk" : undefined}
           ctaHref={!session ? "/register" : "/logout"}
           ctaText={!session ? 'Daftar' : 'Keluar'}
         />
-        {children}
+        <main className="min-h-screen  flex justify-center container mx-auto p-4 ">
+          {children}
+        </main>
       </body>
     </html>
   );
 }
+
+export const menuPanitia: Navbar01NavLink[] = [
+  { label: "Dashboard", href: "/panitia" },
+  { label: "Daftar Lomba", href: "/panitia/lomba" },
+  { label: "Peserta", href: "/panitia/peserta" },
+  { label: "Panitia", href: "/panitia/panitia" },
+  // { label: "Juri", href: "/panitia/juri" },
+  { label: "Pengaturan", href: "/panitia/settings" },
+  { label: "Profile", href: "/panitia/profile" },
+]
 
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
@@ -52,3 +72,19 @@ const defaultNavigationLinks: Navbar01NavLink[] = [
   { href: '/peserta', label: 'Peserta' },
   { href: '/admin', label: 'Admin' },
 ];
+
+// Default navigation links
+const menuAdmin: Navbar01NavLink[] = [
+  { href: '/', label: 'Home', },
+  { href: '/panitia', label: 'Panitia' },
+  { href: '/peserta', label: 'Peserta' },
+  { href: '/admin', label: 'Admin' },
+];
+
+const menuPeserta: Navbar01NavLink[] = [
+  { label: "Dashboard", href: "/panitia" },
+  // { title: "Daftar Lomba", link: "/panitia/lomba" },
+  // { title: "Peserta", link: "/panitia/peserta" },
+  // { title: "Juri", link: "/panitia/juri" },
+  // { title: "Pengaturan", link: "/panitia/settings" },
+]

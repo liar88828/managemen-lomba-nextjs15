@@ -3,6 +3,10 @@
 import bcrypt from "bcryptjs"
 import { prisma } from "../lib/prisma"
 import { createSession, getSession } from "./session"
+import { RoleUser } from "./config"
+import { redirect } from "next/navigation"
+import { getRedirectError } from "next/dist/client/components/redirect"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 
 export async function registerAction(formData: FormData) {
@@ -23,7 +27,7 @@ export async function registerAction(formData: FormData) {
         })
 
         // Simpan ke DB session
-        const { token, expiresAt } = await createSession(user.id)
+        const { token, expiresAt } = await createSession({ ...user, role: user.role as RoleUser })
 
         // Simpan ke cookie (iron-session)
         const session = await getSession()
@@ -36,8 +40,13 @@ export async function registerAction(formData: FormData) {
         session.expiresAt = expiresAt
         await session.save()
 
+        redirect('/login')
+
         return { success: true, message: "Pendaftaran berhasil!", user: session.user }
     } catch (error: any) {
+        if (isRedirectError(error)) {
+            throw error
+        }
         return { success: false, message: error.message }
     }
 }
@@ -53,20 +62,10 @@ export async function loginAction(formData: FormData) {
     if (!valid) return { success: false, message: "Password salah" }
 
     // Simpan ke DB session
-    const { token, expiresAt } = await createSession(user.id)
+    const session = await createSession({ ...user, role: user.role as RoleUser })
+    redirect('/halaman')
 
-    // Simpan ke cookie (iron-session)
-    const session = await getSession()
-    session.user = {
-        id: user.id, name: user.name, email: user.email,
-        // @ts-expect-error
-        role: user.role
-    }
-    session.token = token
-    session.expiresAt = expiresAt
-    await session.save()
-
-    return { success: true, message: `Selamat datang ${user.name}!`, user: session.user }
+    // return { success: true, message: `Selamat datang ${user.name}!`, user: session.user }
 }
 
 export async function logoutAction() {

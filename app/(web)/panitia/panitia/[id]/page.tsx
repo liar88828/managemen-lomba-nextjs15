@@ -4,51 +4,43 @@ import { useParams } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Peserta, usePesertaStore } from "@/app/store/usePesertaStore"
-import { useEffect, useState } from "react"
+import { Panitia, usePanitiaStore } from "@/app/store/usePanitiaStore"
 import { Dialog, DialogHeader, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Lomba, useLombaStore } from "@/app/store/useLombaStore"
-import { formatDate } from "@/app/lib/formatter"
+import { useLombaStore } from "@/app/store/useLombaStore"
 
-export default function DetailPesertaPage() {
-
-    const [peserta, setPeserta] = useState<Peserta | undefined>()
+export default function DetailPanitiaPage() {
     const params = useParams()
-    const pesertaId = params.id as string
-    const getPeserta = usePesertaStore((state) => state.getPeserta)
+    const PanitiaId = params.id as string
+    const getPanitia = usePanitiaStore((state) => state.getPanitia)
+    const Panitia: Panitia | undefined = getPanitia(PanitiaId)
 
-    useEffect(() => {
-        setPeserta(getPeserta(pesertaId))
-    }, [pesertaId, getPeserta])
-
-
-    if (!peserta) return <div>Peserta tidak ditemukan.</div>
+    if (!Panitia) return <div>Panitia tidak ditemukan.</div>
 
     return (
         <div className="p-6 space-y-6 w-full">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Detail Peserta</h1>
-                <Link href="/peserta">
+                <h1 className="text-2xl font-bold">Detail Panitia</h1>
+                <Link href="/Panitia">
                     <Button variant="outline">Kembali</Button>
                 </Link>
             </div>
 
             <Card className="shadow-md">
                 <CardHeader>
-                    <CardTitle>{peserta.name}</CardTitle>
+                    <CardTitle>{Panitia.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <p><strong>Email:</strong> {peserta.email}</p>
-                    <p><strong>No HP:</strong> {peserta.hp}</p>
-                    <p><strong>Lokasi:</strong> {peserta.lokasi}</p>
-                    {/* <p><strong>Lomba:</strong> {peserta.lomba}</p> */}
-                    <p><strong>Dibuat pada:</strong> {formatDate(peserta.createdAt)}</p>
+                    <p><strong>Email:</strong> {Panitia.email}</p>
+                    <p><strong>No HP:</strong> {Panitia.hp}</p>
+                    <p><strong>Lokasi:</strong> {Panitia.lokasi}</p>
+                    {/* <p><strong>Lomba:</strong> {Panitia.lomba}</p> */}
+                    <p><strong>Dibuat pada:</strong> {Panitia.createdAt.toLocaleString("id-ID")}</p>
                 </CardContent>
             </Card>
 
+            {/* Panitia Lomba */}
+            <PanitiaDetailLomba Panitia={Panitia} />
 
-            {/* Lomba Lomba */}
-            <PesertaDetailLomba peserta={peserta} />
 
         </div>
     )
@@ -57,18 +49,18 @@ export default function DetailPesertaPage() {
 
 
 
-export function PesertaDetailLomba({ peserta }: Readonly<{ peserta: Peserta }>) {
-    const { getLombaByIdPeserta, lombas: lombaList, addPesertaToLomba, removePesertaFromLomba } = useLombaStore()
+
+export function PanitiaDetailLomba({ Panitia }: Readonly<{ Panitia: Panitia }>) {
+    const { getLombaByIdPanitia, lombas: lombaList, addPanitiaToLomba, removePanitiaFromLomba } = useLombaStore()
 
     // const [lombas, setLombas] = useState<Lomba[] | undefined>()
     // useEffect(() => {
-    //     setLombas(getLombaByIdPeserta(peserta.id))
-    // }, [lombaList, peserta.id, getLombaByIdPeserta])
+    //     setLombas(getLombaByIdPanitia(Panitia.id))
+    // }, [lombaList, Panitia.id, getLombaByIdPanitia])
 
 
     // derive lombas directly from store
-    const lombas = getLombaByIdPeserta(peserta.id)
-
+    const lombas = getLombaByIdPanitia(Panitia.id)
     if (!lombas) return <div>Lomba tidak ditemukan.</div>
 
     return (
@@ -81,13 +73,13 @@ export function PesertaDetailLomba({ peserta }: Readonly<{ peserta: Peserta }>) 
                     </DialogTrigger>
                     <DialogContent className="max-w-lg">
                         <DialogHeader>
-                            <DialogTitle>Kelola Lomba</DialogTitle>
+                            <DialogTitle>Kelola Panitia</DialogTitle>
                             <DialogDescription >Lomba yang tersedia</DialogDescription>
                         </DialogHeader>
 
                         <div className="space-y-4">
                             {lombaList.length === 0 && (
-                                <p className="text-sm text-muted-foreground">Belum ada Lomba terdaftar.</p>
+                                <p className="text-sm text-muted-foreground">Belum ada panitia terdaftar.</p>
                             )}
                             {lombaList
                                 .filter((lomba) => !lombas?.some(lp => lp.id === lomba.id))
@@ -100,7 +92,7 @@ export function PesertaDetailLomba({ peserta }: Readonly<{ peserta: Peserta }>) 
                                             </div>
                                             <Button
                                                 size="sm"
-                                                onClick={() => addPesertaToLomba(lomba.id, peserta)}
+                                                onClick={() => addPanitiaToLomba(lomba.id, Panitia)}
                                             >
                                                 Tambah
                                             </Button>
@@ -115,7 +107,7 @@ export function PesertaDetailLomba({ peserta }: Readonly<{ peserta: Peserta }>) 
             <CardContent>
                 <div className="grid gap-2">
                     {!lombas || lombas.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Belum ada Lomba ditambahkan.</p>
+                        <p className="text-sm text-muted-foreground">Belum ada panitia ditambahkan.</p>
                     ) : (
                         lombas.map((lomba) => (
                             <Card key={lomba.id}>
@@ -127,7 +119,7 @@ export function PesertaDetailLomba({ peserta }: Readonly<{ peserta: Peserta }>) 
                                     <Button
                                         variant="destructive"
                                         size="sm"
-                                        onClick={() => removePesertaFromLomba(lomba.id, peserta.id)}
+                                        onClick={() => removePanitiaFromLomba(lomba.id, Panitia.id)}
                                     >
                                         Hapus
                                     </Button>

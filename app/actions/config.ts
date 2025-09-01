@@ -1,8 +1,10 @@
+
+export type RoleUser = "PESERTA" | "PANITIA" | "ADMIN"
 export interface SessionUser {
     id: string
     name: string
     email: string
-    role: "PESERTA" | "PANITIA" | "ADMIN",
+    role: RoleUser
 
 }
 

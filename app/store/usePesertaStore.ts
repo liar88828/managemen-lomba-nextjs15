@@ -7,8 +7,7 @@ export interface Peserta {
     email: string
     hp: string
     lokasi: string
-    lomba: string
-    createdAt: Date
+    createdAt: string | Date
 }
 
 interface PesertaState {

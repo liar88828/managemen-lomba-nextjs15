@@ -6,7 +6,6 @@ import { useEffect, useState, useRef } from 'react';
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 import {
@@ -215,7 +214,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                   <NavigationMenuList className="gap-1">
                     {navigationLinks.map((link, index) => {
                       const isActive = path === link.href || (link.href !== '/' && path?.startsWith(link.href));
-                      console.log('Link:', link.href, 'Path:', path, 'isActive:', isActive);
+                      // console.log('Link:', link.href, 'Path:', path, 'isActive:', isActive);
                       return (
                         <NavigationMenuItem key={index}>
                           <button
